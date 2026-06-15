@@ -34,27 +34,33 @@ function createRunningRun(): CollectionRun {
 
 async function collectWithBrowserSearch(): Promise<CollectionCandidate[]> {
   const provider = new BrowserSearchProvider();
-  const maxSearchTasks = getCollectionRuntimeConfig().maxSearchTasksPerRun;
-  const queries = buildCollectionQueries().slice(0, maxSearchTasks);
+  const runtimeConfig = getCollectionRuntimeConfig();
+  const queries = buildCollectionQueries({
+    queriesPerCategory: runtimeConfig.searchQueriesPerCategory,
+  });
   const candidates: CollectionCandidate[] = [];
 
-  for (const item of queries) {
-    const results = await provider.search(item.query, {
-      maxResults: 5,
-      freshnessDays: 3,
-    });
-
-    for (const result of results) {
-      candidates.push({
-        title: result.title,
-        category: item.category,
-        url: result.url,
-        sourceName: result.sourceName,
-        snippet: result.snippet || result.title,
-        publishedAt: result.publishedAt ?? result.discoveredAt,
-        discoveredAt: result.discoveredAt,
+  try {
+    for (const item of queries) {
+      const results = await provider.search(item.query, {
+        maxResults: runtimeConfig.maxSearchResultsPerQuery,
+        freshnessDays: 3,
       });
+
+      for (const result of results) {
+        candidates.push({
+          title: result.title,
+          category: item.category,
+          url: result.url,
+          sourceName: result.sourceName,
+          snippet: result.snippet || result.title,
+          publishedAt: result.publishedAt ?? result.discoveredAt,
+          discoveredAt: result.discoveredAt,
+        });
+      }
     }
+  } finally {
+    await provider.close();
   }
 
   return candidates;

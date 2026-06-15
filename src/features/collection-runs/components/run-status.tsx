@@ -17,9 +17,16 @@ export function RunStatus({
 }) {
   if (!run) {
     return (
-      <p className="text-sm text-muted-foreground">
-        尚未运行采集任务，当前采集模式：{formatMode(runtime)}。
-      </p>
+      <div className="space-y-1 text-sm text-muted-foreground">
+        <p>尚未运行采集任务，当前采集模式：{formatMode(runtime)}。</p>
+        {runtime.mode === "browser-search" ? (
+          <p>
+            立即采集覆盖 {runtime.searchDirectionsPerRun} 个方向，每个方向{" "}
+            {runtime.searchQueriesPerCategory} 组关键词，每组最多{" "}
+            {runtime.maxSearchResultsPerQuery} 条候选。
+          </p>
+        ) : null}
+      </div>
     );
   }
 
@@ -30,6 +37,13 @@ export function RunStatus({
         {runtime.deepSeekEvaluationEnabled ? "，DeepSeek 评估开启" : ""}
         {runtime.livePageCrawlEnabled ? "，页面抽取开启" : ""}。
       </p>
+      {runtime.mode === "browser-search" ? (
+        <p>
+          立即采集覆盖 {runtime.searchDirectionsPerRun} 个方向，每个方向{" "}
+          {runtime.searchQueriesPerCategory} 组关键词，每组最多{" "}
+          {runtime.maxSearchResultsPerQuery} 条候选。
+        </p>
+      ) : null}
       <p>
         上次采集：{formatDateTime(run.startedAt)}，状态 {run.status}，
         发现 {run.urlsDiscovered} 条，保存 {run.signalsSaved} 条。

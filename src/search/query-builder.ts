@@ -1,6 +1,15 @@
-import { signalCategories } from "@/features/signals/types";
+import { signalCategories, type SignalCategory } from "@/features/signals/types";
 
-const categoryQueryMap: Record<(typeof signalCategories)[number], string[]> = {
+export type CollectionQuery = {
+  category: SignalCategory;
+  query: string;
+};
+
+type BuildCollectionQueriesOptions = {
+  queriesPerCategory?: number;
+};
+
+const categoryQueryMap: Record<SignalCategory, string[]> = {
   考公考编: ["考公 报名 窗口 新公告", "事业单位 招聘 冷门 岗位"],
   升学深造: ["保研 夏令营 导师 招生 新通知", "留学 交换 项目 申请 窗口"],
   大厂求职: ["大厂 实习 内推 HC 新开", "校招 补录 笔试 面试 信息"],
@@ -15,11 +24,15 @@ const categoryQueryMap: Record<(typeof signalCategories)[number], string[]> = {
   城市资源: ["城市 消费券 落户 活动 新发布", "本地生活 资源 开放"],
 };
 
-export function buildCollectionQueries() {
+export function buildCollectionQueries({
+  queriesPerCategory = Number.POSITIVE_INFINITY,
+}: BuildCollectionQueriesOptions = {}): CollectionQuery[] {
   return signalCategories.flatMap((category) =>
-    categoryQueryMap[category].map((query) => ({
-      category,
-      query,
-    })),
+    categoryQueryMap[category]
+      .slice(0, queriesPerCategory)
+      .map((query) => ({
+        category,
+        query,
+      })),
   );
 }

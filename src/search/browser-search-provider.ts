@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { chromium } from "playwright-core";
+import { chromium, type BrowserContext } from "playwright-core";
 
 import { getEnv } from "@/lib/env";
 
@@ -63,14 +63,20 @@ type BrowserSearchExtractedResult = {
 };
 
 export class BrowserSearchProvider implements SearchProvider {
-  async search(query: string, options: SearchOptions): Promise<SearchResult[]> {
+  private context: BrowserContext | null = null;
+
+  private async getContext() {
+    if (this.context) {
+      return this.context;
+    }
+
     const profileDir = path.resolve(
       process.cwd(),
       getEnv("BROWSER_PROFILE_DIR", ".browser-profile"),
     );
     const executablePath = getEnv("CHROME_EXECUTABLE_PATH");
 
-    const context = await chromium.launchPersistentContext(profileDir, {
+    this.context = await chromium.launchPersistentContext(profileDir, {
       channel: executablePath ? undefined : "chrome",
       executablePath: executablePath || undefined,
       headless: false,
@@ -78,8 +84,23 @@ export class BrowserSearchProvider implements SearchProvider {
       viewport: { width: 1280, height: 900 },
     });
 
+    return this.context;
+  }
+
+  async close() {
+    if (!this.context) {
+      return;
+    }
+
+    await this.context.close();
+    this.context = null;
+  }
+
+  async search(query: string, options: SearchOptions): Promise<SearchResult[]> {
+    const context = await this.getContext();
+    const page = await context.newPage();
+
     try {
-      const page = await context.newPage();
       const enrichedQuery = enrichQuery(query, options.freshnessDays);
       const engines = getEnabledSearchEngines();
       let results: BrowserSearchExtractedResult[] = [];
@@ -269,7 +290,7 @@ export class BrowserSearchProvider implements SearchProvider {
         discoveredAt: now,
       }));
     } finally {
-      await context.close();
+      await page.close();
     }
   }
 }

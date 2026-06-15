@@ -1,4 +1,5 @@
 import { getBooleanEnv, getNumberEnv } from "@/lib/env";
+import { signalCategories } from "@/features/signals/types";
 
 export type CollectionMode = "browser-search" | "sample";
 
@@ -7,7 +8,9 @@ export type CollectionRuntimeConfig = {
   liveBrowserSearchEnabled: boolean;
   livePageCrawlEnabled: boolean;
   deepSeekEvaluationEnabled: boolean;
-  maxSearchTasksPerRun: number;
+  searchDirectionsPerRun: number;
+  searchQueriesPerCategory: number;
+  maxSearchResultsPerQuery: number;
 };
 
 export function getCollectionRuntimeConfig(): CollectionRuntimeConfig {
@@ -24,6 +27,8 @@ export function getCollectionRuntimeConfig(): CollectionRuntimeConfig {
       "ENABLE_DEEPSEEK_EVALUATION",
       false,
     ),
-    maxSearchTasksPerRun: getNumberEnv("MAX_SEARCH_TASKS_PER_RUN", 4),
+    searchDirectionsPerRun: signalCategories.length,
+    searchQueriesPerCategory: getNumberEnv("SEARCH_QUERIES_PER_CATEGORY", 1),
+    maxSearchResultsPerQuery: getNumberEnv("MAX_SEARCH_RESULTS_PER_QUERY", 2),
   };
 }
