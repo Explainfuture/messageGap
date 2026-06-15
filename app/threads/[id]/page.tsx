@@ -1,5 +1,8 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { getSignalWithEvidence } from "@/features/signals/server/signals.repository";
 import { ThreadChat } from "@/features/threads/components/thread-chat";
 import {
@@ -30,6 +33,17 @@ export default async function ThreadPage({ params }: ThreadPageProps) {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-7xl px-5 py-6">
+      <div className="mb-4 flex flex-wrap gap-2">
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/signals/${signal.id}`}>
+            <ArrowLeft />
+            返回详情
+          </Link>
+        </Button>
+        <Button asChild variant="ghost" size="sm">
+          <Link href="/">返回看板</Link>
+        </Button>
+      </div>
       <ThreadChat
         threadId={thread.id}
         signal={signal}

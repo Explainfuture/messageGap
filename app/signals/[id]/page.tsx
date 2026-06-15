@@ -1,5 +1,8 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { SignalDetail } from "@/features/signals/components/signal-detail";
 import { getSignalWithEvidence } from "@/features/signals/server/signals.repository";
 
@@ -21,6 +24,14 @@ export default async function SignalPage({ params }: SignalPageProps) {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-7xl px-5 py-6">
+      <div className="mb-4">
+        <Button asChild variant="outline" size="sm">
+          <Link href="/">
+            <ArrowLeft />
+            返回看板
+          </Link>
+        </Button>
+      </div>
       <SignalDetail signal={signal} action={action} />
     </main>
   );
