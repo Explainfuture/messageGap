@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { RunCollectionButton } from "@/features/collection-runs/components/run-collection-button";
 import { RunStatus } from "@/features/collection-runs/components/run-status";
 import { getLatestCollectionRun } from "@/features/collection-runs/server/collection-runs.repository";
+import { getCollectionRuntimeConfig } from "@/features/collection-runs/server/runtime-config";
 import { CategoryFilter } from "@/features/signals/components/category-filter";
 import { SignalList } from "@/features/signals/components/signal-list";
 import { listSignals } from "@/features/signals/server/signals.repository";
@@ -29,7 +30,12 @@ export default async function Home({ searchParams }: HomeProps) {
   const params = await searchParams;
   const activeCategory = parseCategory(params?.category);
   const query = params?.query;
-  const signals = listSignals({ category: activeCategory, query });
+  const runtimeConfig = getCollectionRuntimeConfig();
+  const signals = listSignals({
+    category: activeCategory,
+    query,
+    excludeSampleSources: runtimeConfig.mode === "browser-search",
+  });
   const latestRun = getLatestCollectionRun();
 
   return (
@@ -40,9 +46,9 @@ export default async function Home({ searchParams }: HomeProps) {
           <h1 className="text-2xl font-semibold tracking-normal">
             信息差采集看板
           </h1>
-          <RunStatus run={latestRun} />
+          <RunStatus run={latestRun} runtime={runtimeConfig} />
         </div>
-        <RunCollectionButton />
+        <RunCollectionButton runtime={runtimeConfig} />
       </header>
 
       <section className="space-y-4">

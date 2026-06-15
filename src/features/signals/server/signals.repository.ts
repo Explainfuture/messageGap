@@ -16,6 +16,7 @@ export type SignalFilters = {
   category?: SignalCategory | "all";
   query?: string;
   riskLevel?: string;
+  excludeSampleSources?: boolean;
 };
 
 export function ensureSeedSignals() {
@@ -82,6 +83,10 @@ export function listSignals(filters: SignalFilters = {}): InfoSignal[] {
   const query = filters.query?.trim().toLowerCase();
 
   return rows.map(toSignal).filter((signal) => {
+    if (filters.excludeSampleSources && isSampleSignal(signal)) {
+      return false;
+    }
+
     if (filters.category && filters.category !== "all") {
       if (signal.category !== filters.category) {
         return false;
@@ -107,6 +112,16 @@ export function listSignals(filters: SignalFilters = {}): InfoSignal[] {
     }
 
     return true;
+  });
+}
+
+function isSampleSignal(signal: InfoSignal) {
+  return signal.sourceUrls.some((url) => {
+    try {
+      return new URL(url).hostname === "example.com";
+    } catch {
+      return url.includes("example.com");
+    }
   });
 }
 

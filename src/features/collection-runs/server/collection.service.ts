@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
 
-import { getBooleanEnv, getNumberEnv } from "@/lib/env";
 import { BrowserSearchProvider } from "@/search/browser-search-provider";
 import { buildCollectionQueries } from "@/search/query-builder";
 
@@ -15,6 +14,7 @@ import {
 import { dedupeCandidates, filterFreshCandidates } from "./candidate-utils";
 import { evaluateCandidateWithOptionalDeepSeek } from "./deepseek-evaluator";
 import { enrichCandidatesWithPages } from "./page-enrichment.service";
+import { getCollectionRuntimeConfig } from "./runtime-config";
 import { createSampleCandidates } from "./sample-candidates";
 
 function createRunningRun(): CollectionRun {
@@ -34,7 +34,7 @@ function createRunningRun(): CollectionRun {
 
 async function collectWithBrowserSearch(): Promise<CollectionCandidate[]> {
   const provider = new BrowserSearchProvider();
-  const maxSearchTasks = getNumberEnv("MAX_SEARCH_TASKS_PER_RUN", 4);
+  const maxSearchTasks = getCollectionRuntimeConfig().maxSearchTasksPerRun;
   const queries = buildCollectionQueries().slice(0, maxSearchTasks);
   const candidates: CollectionCandidate[] = [];
 
@@ -65,11 +65,8 @@ export async function runManualCollection(): Promise<CollectionRun> {
   insertCollectionRun(run);
 
   try {
-    const liveBrowserSearchEnabled = getBooleanEnv(
-      "ENABLE_LIVE_BROWSER_SEARCH",
-      false,
-    );
-    const rawCandidates = liveBrowserSearchEnabled
+    const runtimeConfig = getCollectionRuntimeConfig();
+    const rawCandidates = runtimeConfig.liveBrowserSearchEnabled
       ? await collectWithBrowserSearch()
       : createSampleCandidates();
     const freshCandidates = filterFreshCandidates(rawCandidates);
@@ -100,7 +97,13 @@ export async function runManualCollection(): Promise<CollectionRun> {
       pagesCrawled: enrichment.pagesCrawled,
       candidatesEvaluated: enrichment.candidates.length,
       signalsSaved,
-      errors: enrichment.errors,
+      errors:
+        runtimeConfig.liveBrowserSearchEnabled && rawCandidates.length === 0
+          ? [
+              ...enrichment.errors,
+              "真实浏览器搜索没有抽取到候选链接。可能遇到搜索引擎 consent、验证码、空结果或 DOM 结构变化。",
+            ]
+          : enrichment.errors,
     };
 
     updateCollectionRun(completed);
