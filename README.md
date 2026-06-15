@@ -7,8 +7,8 @@ MessageGap 是一个本地自用的 Next.js Agent 应用，用来采集最近 3 
 - 信息差看板：首页展示 seed 数据和手动采集结果。
 - 手动采集：`POST /api/collection/run`。
 - 默认采集模式：fixture 数据，保证本地闭环稳定可跑。
-- 实时采集模式：通过 Playwright 驱动浏览器搜索，不接第三方搜索 API。
-- 登录态爬取：通过本机浏览器 profile 访问用户自己能正常打开的页面。
+- 实时采集模式：服务端 HTTP 网页搜索，不打开本机浏览器做搜索。
+- 登录态页面抽取：可选通过本机浏览器 profile 访问用户自己能正常打开的页面。
 - DeepSeek 评估：可选开启，失败时自动回退本地启发式评分。
 - Agent 追问线程：从信息差详情页创建线程，通过 SSE 展示消息和工具事件。
 - 工具事件：支持 `tool_call_use` 和 `tool_call_end` 持久化与前端展示。
@@ -49,9 +49,11 @@ cp .env.example .env.local
 
 关键配置：
 
-- `ENABLE_LIVE_BROWSER_SEARCH=false`
+- `ENABLE_LIVE_WEB_SEARCH=false`
   - `false`：使用 fixture 候选数据。
-  - `true`：使用 Playwright 打开浏览器搜索。
+  - `true`：使用服务端 HTTP 网页搜索，不打开本机浏览器。
+- `WEB_SEARCH_ENGINES=duckduckgo,bing`
+  - 服务端网页搜索引擎顺序。
 - `ENABLE_LIVE_PAGE_CRAWL=false`
   - `true`：对候选 URL 做页面正文抽取。
 - `MAX_LIVE_PAGE_CRAWLS=3`
@@ -62,14 +64,14 @@ cp .env.example .env.local
   - `true`：调用 DeepSeek 做结构化信息差筛选。
 - `ENABLE_DEEPSEEK_AGENT=true`
   - `true`：Agent 追问回答优先使用 DeepSeek；没有 API Key 时自动回退本地回答。
-- `ENABLE_AGENT_BROWSER_SEARCH=false`
-  - `true`：Agent 追问时允许实时浏览器搜索相似信号。
+- `ENABLE_AGENT_WEB_SEARCH=false`
+  - `true`：Agent 追问时允许实时网页搜索相似信号。
 - `DEEPSEEK_API_KEY=`
   - DeepSeek API Key。
 - `BROWSER_PROFILE_DIR=.browser-profile`
-  - 登录态浏览器 profile 存放目录，已被 `.gitignore` 忽略。
+  - 登录态页面抽取的浏览器 profile 存放目录，已被 `.gitignore` 忽略。
 - `CHROME_EXECUTABLE_PATH=`
-  - 如本机 Chrome 无法自动发现，可填写 Chrome 可执行文件路径。
+  - 如开启页面抽取且本机 Chrome 无法自动发现，可填写 Chrome 可执行文件路径。
 
 ## 验证命令
 
@@ -91,4 +93,4 @@ npm run build
 
 ## 注意事项
 
-实时浏览器搜索和登录态爬取只应用于用户自己能正常打开的页面。不要绕过权限、风控、登录限制或平台规则。
+服务端网页搜索只用于公开搜索结果；登录态页面抽取只应用于用户自己能正常打开的页面。不要绕过权限、风控、登录限制或平台规则。

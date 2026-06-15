@@ -3,8 +3,8 @@ import type { CollectionRuntimeConfig } from "@/features/collection-runs/server/
 import { formatDateTime } from "@/lib/time";
 
 function formatMode(runtime: CollectionRuntimeConfig) {
-  return runtime.mode === "browser-search"
-    ? "真实浏览器搜索"
+  return runtime.mode === "web-search"
+    ? "服务端网页搜索"
     : "示例数据";
 }
 
@@ -19,7 +19,7 @@ export function RunStatus({
     return (
       <div className="max-w-3xl space-y-1 rounded-lg border bg-card/70 px-3 py-2 text-sm text-muted-foreground shadow-sm shadow-primary/5">
         <p>尚未运行采集任务，当前采集模式：{formatMode(runtime)}。</p>
-        {runtime.mode === "browser-search" ? (
+        {runtime.mode === "web-search" ? (
           <p>
             立即采集覆盖 {runtime.searchDirectionsPerRun} 个方向，每个方向最多{" "}
             {runtime.maxSearchResultsPerCategory} 条候选，最多用{" "}
@@ -37,7 +37,7 @@ export function RunStatus({
         {runtime.deepSeekEvaluationEnabled ? "，DeepSeek 评估开启" : ""}
         {runtime.livePageCrawlEnabled ? "，页面抽取开启" : ""}。
       </p>
-      {runtime.mode === "browser-search" ? (
+      {runtime.mode === "web-search" ? (
         <p>
           立即采集覆盖 {runtime.searchDirectionsPerRun} 个方向，每个方向最多{" "}
           {runtime.maxSearchResultsPerCategory} 条候选，最多用{" "}

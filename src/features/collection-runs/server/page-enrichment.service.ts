@@ -1,5 +1,6 @@
 import { crawlWithLoggedInBrowser } from "@/crawler/browser-crawler";
 import { getBooleanEnv, getNumberEnv } from "@/lib/env";
+import { inferPublishedAtFromText } from "@/lib/freshness";
 
 import type { CollectionCandidate } from "./collection-candidate";
 
@@ -32,12 +33,16 @@ export async function enrichCandidatesWithPages(
 
     try {
       const page = await crawlWithLoggedInBrowser(candidate.url);
+      const inferredPublishedAt = inferPublishedAtFromText(
+        `${page.title} ${page.text.slice(0, 4000)}`,
+      );
       pagesCrawled += 1;
       enriched.push({
         ...candidate,
         title: page.title || candidate.title,
         snippet: textSnippet(page.text) || candidate.snippet,
         extractedText: page.text,
+        publishedAt: inferredPublishedAt ?? candidate.publishedAt,
       });
     } catch (error) {
       errors.push(

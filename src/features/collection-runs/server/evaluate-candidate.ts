@@ -52,7 +52,7 @@ export function evaluateCandidate(candidate: CollectionCandidate): {
       id,
       title: candidate.title,
       category: candidate.category,
-      tags: [candidate.sourceName, candidate.category, "浏览器搜索"],
+      tags: [candidate.sourceName, candidate.category, "网页搜索"],
       summary: candidate.snippet,
       whyItMatters:
         "内容发布时间很近，且包含具体变化、窗口或重复反馈，值得作为信息差候选继续追问。",

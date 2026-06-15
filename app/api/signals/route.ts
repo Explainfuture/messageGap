@@ -20,8 +20,8 @@ export async function GET(request: Request) {
         : "all",
     query,
     excludeSampleSources:
-      runtimeConfig.mode === "browser-search" && !includeSamples,
-    excludeStaleSources: runtimeConfig.mode === "browser-search",
+      runtimeConfig.mode === "web-search" && !includeSamples,
+    excludeStaleSources: runtimeConfig.mode === "web-search",
   });
 
   return NextResponse.json({ signals });

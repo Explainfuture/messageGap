@@ -24,7 +24,7 @@ function fallbackAnswer(userQuestion: string, context: AgentEvidenceContext) {
   const relatedText =
     context.relatedSearchResults.length > 0
       ? `我还找到了 ${context.relatedSearchResults.length} 条相似搜索结果，可以作为后续核验线索。`
-      : "当前没有执行实时浏览器搜索，结论只基于本地已保存证据。";
+      : "当前没有执行实时网页搜索，结论只基于本地已保存证据。";
 
   return [
     `基于「${signal.title}」，我会先把它当成一个需要二次核验的早期信号，而不是直接执行的结论。`,

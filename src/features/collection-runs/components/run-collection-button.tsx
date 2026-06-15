@@ -18,7 +18,7 @@ type CollectionRunResponse = {
 };
 
 function modeLabel(mode: CollectionMode) {
-  return mode === "browser-search" ? "真实搜索" : "示例模式";
+  return mode === "web-search" ? "网页搜索" : "示例模式";
 }
 
 export function RunCollectionButton({

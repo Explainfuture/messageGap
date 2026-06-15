@@ -1,11 +1,11 @@
 import { getBooleanEnv, getNumberEnv } from "@/lib/env";
 import { signalCategories } from "@/features/signals/types";
 
-export type CollectionMode = "browser-search" | "sample";
+export type CollectionMode = "web-search" | "sample";
 
 export type CollectionRuntimeConfig = {
   mode: CollectionMode;
-  liveBrowserSearchEnabled: boolean;
+  liveWebSearchEnabled: boolean;
   livePageCrawlEnabled: boolean;
   deepSeekEvaluationEnabled: boolean;
   searchDirectionsPerRun: number;
@@ -19,14 +19,14 @@ function getPositiveIntegerEnv(name: string, fallback: number) {
 }
 
 export function getCollectionRuntimeConfig(): CollectionRuntimeConfig {
-  const liveBrowserSearchEnabled = getBooleanEnv(
-    "ENABLE_LIVE_BROWSER_SEARCH",
-    false,
+  const liveWebSearchEnabled = getBooleanEnv(
+    "ENABLE_LIVE_WEB_SEARCH",
+    getBooleanEnv("ENABLE_LIVE_BROWSER_SEARCH", false),
   );
 
   return {
-    mode: liveBrowserSearchEnabled ? "browser-search" : "sample",
-    liveBrowserSearchEnabled,
+    mode: liveWebSearchEnabled ? "web-search" : "sample",
+    liveWebSearchEnabled,
     livePageCrawlEnabled: getBooleanEnv("ENABLE_LIVE_PAGE_CRAWL", false),
     deepSeekEvaluationEnabled: getBooleanEnv(
       "ENABLE_DEEPSEEK_EVALUATION",

@@ -3,7 +3,7 @@ import type { AgentMessage, ToolCallEvent } from "@/features/threads/types";
 import { createMessage } from "@/features/threads/server/threads.repository";
 
 import { generateAgentAnswer } from "./deepseek-answer";
-import { searchRelatedSignals } from "./tools/browser-search-tool";
+import { searchRelatedSignals } from "./tools/web-search-tool";
 import { runTracedTool } from "./tool-runtime";
 
 export type ThreadAgentHandlers = {
@@ -48,7 +48,7 @@ export async function runThreadAgent(params: {
     {
       threadId: params.threadId,
       messageId: params.userMessage.id,
-      toolName: "browser-search",
+      toolName: "web-search",
       inputPreview: {
         query: `${params.signal.title} 24小时 相似`,
       },

@@ -142,7 +142,7 @@ export function createSeedSignals(): Array<{
         summary:
           "一个浏览器自动化 Agent 项目在短时间内获得连续 star，可能反映开发者对登录态网页自动化的需求增加。",
         whyItMatters:
-          "项目方向与 MessageGap 的浏览器搜索和登录态爬取能力相关，值得追踪 API 设计和风险边界。",
+          "项目方向与 MessageGap 的登录态页面抽取能力相关，值得追踪 API 设计和风险边界。",
         sourceUrls: ["https://example.com/github/browser-agent"],
         publishedAt: publishedThree,
         discoveredAt: discoveredThree,

@@ -34,8 +34,8 @@ export default async function Home({ searchParams }: HomeProps) {
   const signals = listSignals({
     category: activeCategory,
     query,
-    excludeSampleSources: runtimeConfig.mode === "browser-search",
-    excludeStaleSources: runtimeConfig.mode === "browser-search",
+    excludeSampleSources: runtimeConfig.mode === "web-search",
+    excludeStaleSources: runtimeConfig.mode === "web-search",
   });
   const latestRun = getLatestCollectionRun();
 

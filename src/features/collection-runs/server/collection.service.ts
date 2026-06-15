@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { BrowserSearchProvider } from "@/search/browser-search-provider";
+import { HttpSearchProvider } from "@/search/http-search-provider";
 import {
   buildCollectionQueries,
   type CollectionQuery,
@@ -40,8 +40,8 @@ function createRunningRun(): CollectionRun {
   };
 }
 
-async function collectWithBrowserSearch(): Promise<CollectionCandidate[]> {
-  const provider = new BrowserSearchProvider();
+async function collectWithWebSearch(): Promise<CollectionCandidate[]> {
+  const provider = new HttpSearchProvider();
   const runtimeConfig = getCollectionRuntimeConfig();
   const queries = buildCollectionQueries({
     queriesPerCategory: runtimeConfig.searchQueriesPerCategory,
@@ -50,51 +50,47 @@ async function collectWithBrowserSearch(): Promise<CollectionCandidate[]> {
   const queriesByCategory = new Map<SignalCategory, CollectionQuery[]>();
   const seenUrlsByCategory = new Map<SignalCategory, Set<string>>();
 
-  try {
-    for (const query of queries) {
-      const categoryQueries = queriesByCategory.get(query.category) ?? [];
-      categoryQueries.push(query);
-      queriesByCategory.set(query.category, categoryQueries);
-    }
+  for (const query of queries) {
+    const categoryQueries = queriesByCategory.get(query.category) ?? [];
+    categoryQueries.push(query);
+    queriesByCategory.set(query.category, categoryQueries);
+  }
 
-    for (const category of signalCategories) {
-      const categoryQueries = queriesByCategory.get(category) ?? [];
-      const seenUrls = seenUrlsByCategory.get(category) ?? new Set<string>();
-      seenUrlsByCategory.set(category, seenUrls);
+  for (const category of signalCategories) {
+    const categoryQueries = queriesByCategory.get(category) ?? [];
+    const seenUrls = seenUrlsByCategory.get(category) ?? new Set<string>();
+    seenUrlsByCategory.set(category, seenUrls);
 
-      for (const item of categoryQueries) {
-        const remaining =
-          runtimeConfig.maxSearchResultsPerCategory - seenUrls.size;
+    for (const item of categoryQueries) {
+      const remaining =
+        runtimeConfig.maxSearchResultsPerCategory - seenUrls.size;
 
-        if (remaining <= 0) {
-          break;
+      if (remaining <= 0) {
+        break;
+      }
+
+      const results = await provider.search(item.query, {
+        maxResults: Math.min(runtimeConfig.maxSearchResultsPerQuery, remaining),
+        freshnessDays: 3,
+      });
+
+      for (const result of results) {
+        if (seenUrls.has(result.url)) {
+          continue;
         }
 
-        const results = await provider.search(item.query, {
-          maxResults: Math.min(runtimeConfig.maxSearchResultsPerQuery, remaining),
-          freshnessDays: 3,
+        seenUrls.add(result.url);
+        candidates.push({
+          title: result.title,
+          category: item.category,
+          url: result.url,
+          sourceName: result.sourceName,
+          snippet: result.snippet || result.title,
+          publishedAt: result.publishedAt ?? "",
+          discoveredAt: result.discoveredAt,
         });
-
-        for (const result of results) {
-          if (seenUrls.has(result.url)) {
-            continue;
-          }
-
-          seenUrls.add(result.url);
-          candidates.push({
-            title: result.title,
-            category: item.category,
-            url: result.url,
-            sourceName: result.sourceName,
-            snippet: result.snippet || result.title,
-            publishedAt: result.publishedAt ?? result.discoveredAt,
-            discoveredAt: result.discoveredAt,
-          });
-        }
       }
     }
-  } finally {
-    await provider.close();
   }
 
   return candidates;
@@ -107,16 +103,24 @@ export async function runManualCollection(): Promise<CollectionRun> {
     insertCollectionRun(run);
 
     const runtimeConfig = getCollectionRuntimeConfig();
-    const rawCandidates = runtimeConfig.liveBrowserSearchEnabled
-      ? await collectWithBrowserSearch()
+    const rawCandidates = runtimeConfig.liveWebSearchEnabled
+      ? await collectWithWebSearch()
       : createSampleCandidates();
-    const freshCandidates = filterFreshCandidates(rawCandidates);
-    const dedupedCandidates = dedupeCandidates(freshCandidates);
+    const freshCandidatesForEnrichment = filterFreshCandidates(rawCandidates, {
+      allowUnknownPublishedAt: true,
+    });
+    const dedupedCandidates = dedupeCandidates(freshCandidatesForEnrichment);
     const enrichment = await enrichCandidatesWithPages(dedupedCandidates);
+    const freshEnrichedCandidates = filterFreshCandidates(
+      enrichment.candidates,
+      {
+        includeExtractedText: true,
+      },
+    );
 
     const evaluated = (
       await Promise.all(
-        enrichment.candidates.map(evaluateCandidateWithOptionalDeepSeek),
+        freshEnrichedCandidates.map(evaluateCandidateWithOptionalDeepSeek),
       )
     ).filter((item) => item !== null);
 
@@ -132,17 +136,19 @@ export async function runManualCollection(): Promise<CollectionRun> {
       status: "success",
       endedAt: new Date().toISOString(),
       sourcesSearched: Array.from(
-        new Set(enrichment.candidates.map((candidate) => candidate.sourceName)),
+        new Set(
+          freshEnrichedCandidates.map((candidate) => candidate.sourceName),
+        ),
       ),
       urlsDiscovered: rawCandidates.length,
       pagesCrawled: enrichment.pagesCrawled,
-      candidatesEvaluated: enrichment.candidates.length,
+      candidatesEvaluated: freshEnrichedCandidates.length,
       signalsSaved,
       errors:
-        runtimeConfig.liveBrowserSearchEnabled && rawCandidates.length === 0
+        runtimeConfig.liveWebSearchEnabled && rawCandidates.length === 0
           ? [
               ...enrichment.errors,
-              "真实浏览器搜索没有抽取到候选链接。可能遇到搜索引擎 consent、验证码、空结果或 DOM 结构变化。",
+              "服务端网页搜索没有抽取到候选链接。可能遇到搜索引擎风控、空结果或 DOM 结构变化。",
             ]
           : enrichment.errors,
     };

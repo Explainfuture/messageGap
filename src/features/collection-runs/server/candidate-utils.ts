@@ -1,5 +1,10 @@
 import type { CollectionCandidate } from "./collection-candidate";
-import { isFreshWithinDays, isStaleTimestampText } from "@/lib/freshness";
+import { inferPublishedAtFromText, isFreshWithinDays } from "@/lib/freshness";
+
+type FilterFreshCandidatesOptions = {
+  allowUnknownPublishedAt?: boolean;
+  includeExtractedText?: boolean;
+};
 
 function normalizeUrl(value: string) {
   try {
@@ -29,12 +34,33 @@ export function dedupeCandidates(candidates: CollectionCandidate[]) {
   return deduped;
 }
 
-export function filterFreshCandidates(candidates: CollectionCandidate[]) {
+function getCandidateTimestampText(
+  candidate: CollectionCandidate,
+  options: FilterFreshCandidatesOptions,
+) {
+  return [
+    candidate.title,
+    candidate.snippet,
+    options.includeExtractedText ? candidate.extractedText : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+export function filterFreshCandidates(
+  candidates: CollectionCandidate[],
+  options: FilterFreshCandidatesOptions = {},
+) {
   return candidates.filter((candidate) => {
-    if (!isFreshWithinDays(candidate.publishedAt || candidate.discoveredAt)) {
-      return false;
+    const inferredPublishedAt = inferPublishedAtFromText(
+      getCandidateTimestampText(candidate, options),
+    );
+    const publishedAt = inferredPublishedAt || candidate.publishedAt;
+
+    if (publishedAt) {
+      return isFreshWithinDays(publishedAt);
     }
 
-    return !isStaleTimestampText(`${candidate.title} ${candidate.snippet}`);
+    return options.allowUnknownPublishedAt === true;
   });
 }
