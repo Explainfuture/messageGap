@@ -16,6 +16,7 @@ export async function runTracedTool<TOutput extends Record<string, unknown>>(
     messageId: string | null;
     toolName: string;
     inputPreview: Record<string, unknown>;
+    outputPreview?: (output: TOutput) => Record<string, unknown>;
     run: () => Promise<TOutput>;
   },
   handlers: ToolLifecycleHandlers,
@@ -45,7 +46,7 @@ export async function runTracedTool<TOutput extends Record<string, unknown>>(
       ...baseEvent,
       eventType: "tool_call_end",
       status: "success",
-      outputPreview: output,
+      outputPreview: params.outputPreview ? params.outputPreview(output) : output,
       endedAt: new Date().toISOString(),
     };
 

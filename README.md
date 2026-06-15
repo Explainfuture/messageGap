@@ -60,6 +60,10 @@ cp .env.example .env.local
   - 每次采集最多跑多少个分类搜索任务。
 - `ENABLE_DEEPSEEK_EVALUATION=false`
   - `true`：调用 DeepSeek 做结构化信息差筛选。
+- `ENABLE_DEEPSEEK_AGENT=true`
+  - `true`：Agent 追问回答优先使用 DeepSeek；没有 API Key 时自动回退本地回答。
+- `ENABLE_AGENT_BROWSER_SEARCH=false`
+  - `true`：Agent 追问时允许实时浏览器搜索相似信号。
 - `DEEPSEEK_API_KEY=`
   - DeepSeek API Key。
 - `BROWSER_PROFILE_DIR=.browser-profile`

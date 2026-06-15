@@ -14,6 +14,10 @@ const deepSeekRequestSchema = z.object({
 
 export type DeepSeekRequest = z.infer<typeof deepSeekRequestSchema>;
 
+export function hasDeepSeekConfig() {
+  return Boolean(getEnv("DEEPSEEK_API_KEY"));
+}
+
 export async function callDeepSeek(request: DeepSeekRequest) {
   const parsed = deepSeekRequestSchema.parse(request);
   const apiKey = getEnv("DEEPSEEK_API_KEY");
@@ -42,4 +46,10 @@ export async function callDeepSeek(request: DeepSeekRequest) {
   return response.json() as Promise<{
     choices?: Array<{ message?: { content?: string } }>;
   }>;
+}
+
+export function extractDeepSeekText(response: {
+  choices?: Array<{ message?: { content?: string } }>;
+}) {
+  return response.choices?.[0]?.message?.content?.trim() ?? "";
 }
