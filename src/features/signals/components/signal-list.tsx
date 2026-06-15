@@ -5,7 +5,7 @@ import { SignalCard } from "./signal-card";
 export function SignalList({ signals }: { signals: InfoSignal[] }) {
   if (signals.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed bg-card p-8 text-center text-sm text-muted-foreground">
+      <div className="rounded-lg border border-dashed border-primary/25 bg-card/80 p-8 text-center text-sm text-muted-foreground shadow-sm shadow-primary/5">
         当前筛选条件下没有信息差。
       </div>
     );

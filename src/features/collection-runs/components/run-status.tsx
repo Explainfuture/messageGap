@@ -17,7 +17,7 @@ export function RunStatus({
 }) {
   if (!run) {
     return (
-      <div className="space-y-1 text-sm text-muted-foreground">
+      <div className="max-w-3xl space-y-1 rounded-lg border bg-card/70 px-3 py-2 text-sm text-muted-foreground shadow-sm shadow-primary/5">
         <p>尚未运行采集任务，当前采集模式：{formatMode(runtime)}。</p>
         {runtime.mode === "browser-search" ? (
           <p>
@@ -31,7 +31,7 @@ export function RunStatus({
   }
 
   return (
-    <div className="space-y-1 text-sm text-muted-foreground">
+    <div className="max-w-3xl space-y-1 rounded-lg border bg-card/70 px-3 py-2 text-sm text-muted-foreground shadow-sm shadow-primary/5">
       <p>
         当前采集模式：{formatMode(runtime)}
         {runtime.deepSeekEvaluationEnabled ? "，DeepSeek 评估开启" : ""}

@@ -25,7 +25,7 @@ export function SignalDetail({
 }) {
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-      <section className="space-y-5">
+      <section className="min-w-0 space-y-5">
         <Card>
           <CardHeader className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
@@ -38,7 +38,7 @@ export function SignalDetail({
               ))}
             </div>
             <div className="space-y-2">
-              <h1 className="text-2xl font-semibold tracking-normal">
+              <h1 className="text-balance text-2xl font-semibold tracking-normal">
                 {signal.title}
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -50,12 +50,12 @@ export function SignalDetail({
           <CardContent className="space-y-5">
             <div className="space-y-2">
               <h2 className="text-sm font-semibold">摘要</h2>
-              <p className="leading-7">{signal.summary}</p>
+              <p className="break-words leading-7">{signal.summary}</p>
             </div>
             <Separator />
             <div className="space-y-2">
               <h2 className="text-sm font-semibold">为什么值得关注</h2>
-              <p className="leading-7">{signal.whyItMatters}</p>
+              <p className="break-words leading-7">{signal.whyItMatters}</p>
             </div>
           </CardContent>
         </Card>
@@ -66,16 +66,19 @@ export function SignalDetail({
           </CardHeader>
           <CardContent className="space-y-3">
             {signal.evidence.map((item) => (
-              <div key={item.id} className="rounded-md border p-3">
+              <div
+                key={item.id}
+                className="rounded-lg border bg-secondary/35 p-3"
+              >
                 <p className="text-sm leading-6">{item.snippet}</p>
                 <a
                   href={item.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-2 inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                  className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   打开来源
-                  <ExternalLink className="size-3.5" />
+                  <ExternalLink aria-hidden="true" className="size-3.5" />
                 </a>
               </div>
             ))}
@@ -83,7 +86,7 @@ export function SignalDetail({
         </Card>
       </section>
 
-      <aside className="space-y-5">
+      <aside className="space-y-5 lg:sticky lg:top-6 lg:self-start">
         <Card>
           <CardHeader>
             <CardTitle>评分</CardTitle>
@@ -129,7 +132,7 @@ export function SignalDetail({
 
         <form action={action}>
           <Button className="w-full" size="lg">
-            <MessageSquareText />
+            <MessageSquareText aria-hidden="true" />
             深入追问
           </Button>
         </form>

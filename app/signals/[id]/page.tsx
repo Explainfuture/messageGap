@@ -23,11 +23,11 @@ export default async function SignalPage({ params }: SignalPageProps) {
   const action = openInvestigationThread.bind(null, signal.id);
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-7xl px-5 py-6">
+    <main className="mx-auto min-h-screen w-full max-w-7xl px-4 py-5 sm:px-6 lg:py-8">
       <div className="mb-4">
         <Button asChild variant="outline" size="sm">
           <Link href="/">
-            <ArrowLeft />
+            <ArrowLeft aria-hidden="true" />
             返回看板
           </Link>
         </Button>

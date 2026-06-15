@@ -100,7 +100,7 @@ export function ThreadChat({
 
   return (
     <div className="grid min-h-screen gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
-      <aside className="space-y-4">
+      <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
         <Card>
           <CardHeader>
             <CardTitle>绑定信息差</CardTitle>
@@ -108,32 +108,32 @@ export function ThreadChat({
           <CardContent className="space-y-3 text-sm leading-6">
             <div className="font-medium">{signal.title}</div>
             <p className="text-muted-foreground">{signal.summary}</p>
-            <div className="rounded-md border p-3">
+            <div className="rounded-lg border bg-secondary/35 p-3">
               风险：{signal.riskWarnings[0]}
             </div>
           </CardContent>
         </Card>
       </aside>
 
-      <section className="flex min-h-[calc(100vh-3rem)] flex-col rounded-lg border bg-card">
-        <div className="border-b p-4">
+      <section className="flex min-h-[calc(100vh-3rem)] flex-col rounded-lg border bg-card/95 shadow-sm shadow-primary/5">
+        <div className="border-b border-primary/10 p-4">
           <h1 className="text-lg font-semibold">Agent 深入追问</h1>
           <p className="text-sm text-muted-foreground">
             工具调用会以 SSE 事件流展示并保存。
           </p>
         </div>
 
-        <div className="flex-1 space-y-3 overflow-y-auto p-4">
+        <div className="flex-1 space-y-3 overflow-y-auto bg-secondary/20 p-4">
           {sortedTimeline.map((item) => {
             if ("role" in item) {
               return (
                 <div
                   key={item.id}
                   className={cn(
-                    "max-w-3xl rounded-lg border p-3 text-sm leading-6",
+                    "max-w-3xl rounded-lg border p-3 text-sm leading-6 shadow-sm",
                     item.role === "user"
-                      ? "ml-auto bg-primary text-primary-foreground"
-                      : "bg-background",
+                      ? "ml-auto border-primary/30 bg-primary text-primary-foreground shadow-primary/15"
+                      : "border-primary/10 bg-card",
                     item.role === "system" && "text-muted-foreground",
                   )}
                 >
@@ -150,15 +150,17 @@ export function ThreadChat({
           })}
         </div>
 
-        <form onSubmit={onSubmit} className="flex gap-2 border-t p-4">
+        <form onSubmit={onSubmit} className="flex gap-2 border-t border-primary/10 p-4">
           <Input
+            aria-label="继续追问"
+            autoComplete="off"
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder="继续追问，例如：打开来源页并判断是否只是孤例"
             disabled={isRunning}
           />
           <Button type="submit" disabled={isRunning}>
-            <SendHorizontal />
+            <SendHorizontal aria-hidden="true" />
             发送
           </Button>
         </form>

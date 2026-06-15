@@ -3,24 +3,28 @@
 @tailwind utilities;
 
 :root {
-  --background: 210 20% 98%;
-  --foreground: 222 47% 11%;
+  --background: 340 76% 98%;
+  --foreground: 336 36% 13%;
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --primary: 173 58% 24%;
+  --card-foreground: 336 36% 13%;
+  --primary: 338 70% 43%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 210 22% 92%;
-  --secondary-foreground: 222 47% 11%;
-  --muted: 210 20% 94%;
-  --muted-foreground: 215 16% 42%;
-  --accent: 42 95% 56%;
-  --accent-foreground: 222 47% 11%;
-  --destructive: 0 72% 44%;
+  --secondary: 338 56% 94%;
+  --secondary-foreground: 336 42% 22%;
+  --muted: 342 38% 95%;
+  --muted-foreground: 333 16% 43%;
+  --accent: 167 44% 38%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 356 72% 46%;
   --destructive-foreground: 0 0% 100%;
-  --border: 214 22% 86%;
-  --input: 214 22% 86%;
-  --ring: 173 58% 28%;
+  --border: 338 34% 86%;
+  --input: 338 34% 86%;
+  --ring: 338 70% 48%;
   --radius: 0.5rem;
+}
+
+html {
+  background: hsl(var(--background));
 }
 
 * {
@@ -29,8 +33,11 @@
 
 body {
   min-height: 100vh;
-  background: hsl(var(--background));
+  background:
+    linear-gradient(180deg, hsl(340 76% 98%) 0%, hsl(24 65% 98%) 100%);
   color: hsl(var(--foreground));
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
 }
 
 a {
@@ -38,6 +45,6 @@ a {
 }
 
 ::selection {
-  background: hsl(var(--accent));
-  color: hsl(var(--accent-foreground));
+  background: hsl(338 72% 88%);
+  color: hsl(var(--foreground));
 }

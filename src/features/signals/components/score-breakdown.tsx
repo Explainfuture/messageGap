@@ -23,9 +23,9 @@ export function ScoreBreakdownView({
             <span className="text-muted-foreground">{label}</span>
             <span className="font-medium">{score[key]}</span>
           </div>
-          <div className="h-2 rounded-full bg-muted">
+          <div className="h-2 rounded-full bg-secondary">
             <div
-              className="h-2 rounded-full bg-primary"
+              className="h-2 rounded-full bg-primary shadow-sm shadow-primary/20"
               style={{ width: `${Math.min(100, score[key] * 4)}%` }}
             />
           </div>

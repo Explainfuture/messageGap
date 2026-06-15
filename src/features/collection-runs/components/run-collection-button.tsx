@@ -60,13 +60,20 @@ export function RunCollectionButton({
   const disabled = isRunning || isPending;
 
   return (
-    <div className="flex flex-col items-end gap-2">
-      <Button onClick={runCollection} disabled={disabled}>
-        {disabled ? <Loader2 className="animate-spin" /> : <Play />}
+    <div className="flex flex-col items-start gap-2 md:items-end">
+      <Button onClick={runCollection} disabled={disabled} size="lg">
+        {disabled ? (
+          <Loader2 aria-hidden="true" className="animate-spin" />
+        ) : (
+          <Play aria-hidden="true" />
+        )}
         立即采集
       </Button>
       {lastRun ? (
-        <p className="max-w-80 text-right text-xs text-muted-foreground">
+        <p
+          aria-live="polite"
+          className="max-w-80 text-left text-xs text-muted-foreground md:text-right"
+        >
           {modeLabel(lastRuntime.mode)}采集完成：发现 {lastRun.urlsDiscovered} 条，评估{" "}
           {lastRun.candidatesEvaluated} 条，新保存 {lastRun.signalsSaved} 条
           {lastRun.errors.length > 0 ? `，错误 ${lastRun.errors.length} 个` : ""}

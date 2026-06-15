@@ -40,11 +40,11 @@ export default async function Home({ searchParams }: HomeProps) {
   const latestRun = getLatestCollectionRun();
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 px-5 py-6">
-      <header className="flex flex-col gap-4 border-b pb-5 md:flex-row md:items-end md:justify-between">
+    <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-6 px-4 py-5 sm:px-6 lg:py-8">
+      <header className="flex flex-col gap-4 border-b border-primary/15 pb-5 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">
           <div className="text-sm font-medium text-primary">MessageGap</div>
-          <h1 className="text-2xl font-semibold tracking-normal">
+          <h1 className="text-balance text-2xl font-semibold tracking-normal">
             信息差采集看板
           </h1>
           <RunStatus run={latestRun} runtime={runtimeConfig} />
@@ -55,13 +55,18 @@ export default async function Home({ searchParams }: HomeProps) {
       <section className="space-y-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <CategoryFilter activeCategory={activeCategory} />
-          <form className="relative w-full md:w-80">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <form className="relative w-full md:w-[360px]">
+            <Search
+              aria-hidden="true"
+              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-primary/60"
+            />
             <Input
+              aria-label="搜索标题、摘要、标签"
+              autoComplete="off"
               name="query"
-              placeholder="搜索标题、摘要、标签"
+              placeholder="搜索标题、摘要、标签…"
               defaultValue={query}
-              className="pl-9"
+              className="bg-card/90 pl-9"
             />
             {activeCategory !== "all" ? (
               <input type="hidden" name="category" value={activeCategory} />
