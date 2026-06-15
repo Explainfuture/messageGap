@@ -3,6 +3,7 @@ import path from "node:path";
 import { chromium, type BrowserContext } from "playwright-core";
 
 import { getEnv } from "@/lib/env";
+import { inferPublishedAtFromText } from "@/lib/freshness";
 
 import type { SearchOptions, SearchProvider, SearchResult } from "./search-provider";
 
@@ -60,6 +61,7 @@ type BrowserSearchExtractedResult = {
   title: string;
   url: string;
   snippet: string;
+  publishedAt?: string;
 };
 
 export class BrowserSearchProvider implements SearchProvider {
@@ -288,6 +290,10 @@ export class BrowserSearchProvider implements SearchProvider {
         ...result,
         sourceName: new URL(result.url).hostname,
         discoveredAt: now,
+        publishedAt:
+          result.publishedAt ??
+          inferPublishedAtFromText(`${result.title} ${result.snippet}`) ??
+          undefined,
       }));
     } finally {
       await page.close();

@@ -35,6 +35,7 @@ export default async function Home({ searchParams }: HomeProps) {
     category: activeCategory,
     query,
     excludeSampleSources: runtimeConfig.mode === "browser-search",
+    excludeStaleSources: runtimeConfig.mode === "browser-search",
   });
   const latestRun = getLatestCollectionRun();
 

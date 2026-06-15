@@ -21,6 +21,7 @@ export async function GET(request: Request) {
     query,
     excludeSampleSources:
       runtimeConfig.mode === "browser-search" && !includeSamples,
+    excludeStaleSources: runtimeConfig.mode === "browser-search",
   });
 
   return NextResponse.json({ signals });

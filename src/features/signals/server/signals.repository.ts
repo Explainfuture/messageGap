@@ -8,6 +8,11 @@ import type {
   SignalEvidence,
   SignalWithEvidence,
 } from "@/features/signals/types";
+import {
+  inferPublishedAtFromText,
+  isGithubUrl,
+  isStaleTimestampText,
+} from "@/lib/freshness";
 
 import { createSeedSignals } from "./seed-signals";
 import { fromEvidence, fromSignal, toEvidence, toSignal } from "./signal-mappers";
@@ -17,6 +22,7 @@ export type SignalFilters = {
   query?: string;
   riskLevel?: string;
   excludeSampleSources?: boolean;
+  excludeStaleSources?: boolean;
 };
 
 export function ensureSeedSignals() {
@@ -87,6 +93,10 @@ export function listSignals(filters: SignalFilters = {}): InfoSignal[] {
       return false;
     }
 
+    if (filters.excludeStaleSources && isStaleOrStaticSignal(signal)) {
+      return false;
+    }
+
     if (filters.category && filters.category !== "all") {
       if (signal.category !== filters.category) {
         return false;
@@ -123,6 +133,26 @@ function isSampleSignal(signal: InfoSignal) {
       return url.includes("example.com");
     }
   });
+}
+
+function isStaleOrStaticSignal(signal: InfoSignal) {
+  const searchableText = [
+    signal.title,
+    signal.summary,
+    signal.whyItMatters,
+    ...signal.tags,
+  ].join(" ");
+
+  if (isStaleTimestampText(searchableText)) {
+    return true;
+  }
+
+  const isGithubSignal = signal.sourceUrls.some(isGithubUrl);
+  if (!isGithubSignal) {
+    return false;
+  }
+
+  return inferPublishedAtFromText(searchableText) === null;
 }
 
 export function getSignalWithEvidence(id: string): SignalWithEvidence | null {

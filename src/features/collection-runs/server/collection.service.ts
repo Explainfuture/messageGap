@@ -54,7 +54,7 @@ async function collectWithBrowserSearch(): Promise<CollectionCandidate[]> {
           url: result.url,
           sourceName: result.sourceName,
           snippet: result.snippet || result.title,
-          publishedAt: result.publishedAt ?? result.discoveredAt,
+          publishedAt: result.publishedAt ?? "",
           discoveredAt: result.discoveredAt,
         });
       }

@@ -1,6 +1,5 @@
 import type { CollectionCandidate } from "./collection-candidate";
-
-const THREE_DAYS_MS = 3 * 24 * 3_600_000;
+import { isFreshWithinDays, isStaleTimestampText } from "@/lib/freshness";
 
 function normalizeUrl(value: string) {
   try {
@@ -31,14 +30,11 @@ export function dedupeCandidates(candidates: CollectionCandidate[]) {
 }
 
 export function filterFreshCandidates(candidates: CollectionCandidate[]) {
-  const now = Date.now();
-
   return candidates.filter((candidate) => {
-    const publishedAt = new Date(candidate.publishedAt).getTime();
-    if (!Number.isFinite(publishedAt)) {
+    if (!isFreshWithinDays(candidate.publishedAt)) {
       return false;
     }
 
-    return now - publishedAt <= THREE_DAYS_MS;
+    return !isStaleTimestampText(`${candidate.title} ${candidate.snippet}`);
   });
 }
