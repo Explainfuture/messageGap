@@ -13,6 +13,7 @@ import type {
 } from "@/features/threads/types";
 import { cn } from "@/lib/utils";
 
+import { MarkdownMessage } from "./markdown-message";
 import { ToolEventRow } from "./tool-event-row";
 
 type ThreadChatProps = {
@@ -137,7 +138,10 @@ export function ThreadChat({
                   )}
                 >
                   <div className="mb-1 text-xs opacity-70">{item.role}</div>
-                  <div className="whitespace-pre-wrap">{item.content}</div>
+                  <MarkdownMessage
+                    content={item.content}
+                    inverted={item.role === "user"}
+                  />
                 </div>
               );
             }
