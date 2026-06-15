@@ -31,7 +31,7 @@ export function dedupeCandidates(candidates: CollectionCandidate[]) {
 
 export function filterFreshCandidates(candidates: CollectionCandidate[]) {
   return candidates.filter((candidate) => {
-    if (!isFreshWithinDays(candidate.publishedAt)) {
+    if (!isFreshWithinDays(candidate.publishedAt || candidate.discoveredAt)) {
       return false;
     }
 

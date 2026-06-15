@@ -1,9 +1,13 @@
 import { randomUUID } from "node:crypto";
 
 import { BrowserSearchProvider } from "@/search/browser-search-provider";
-import { buildCollectionQueries } from "@/search/query-builder";
+import {
+  buildCollectionQueries,
+  type CollectionQuery,
+} from "@/search/query-builder";
 
 import { insertSignalWithEvidence } from "@/features/signals/server/signals.repository";
+import { signalCategories, type SignalCategory } from "@/features/signals/types";
 
 import type { CollectionRun } from "../types";
 import type { CollectionCandidate } from "./collection-candidate";
@@ -16,6 +20,10 @@ import { evaluateCandidateWithOptionalDeepSeek } from "./deepseek-evaluator";
 import { enrichCandidatesWithPages } from "./page-enrichment.service";
 import { getCollectionRuntimeConfig } from "./runtime-config";
 import { createSampleCandidates } from "./sample-candidates";
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
 
 function createRunningRun(): CollectionRun {
   return {
@@ -39,24 +47,50 @@ async function collectWithBrowserSearch(): Promise<CollectionCandidate[]> {
     queriesPerCategory: runtimeConfig.searchQueriesPerCategory,
   });
   const candidates: CollectionCandidate[] = [];
+  const queriesByCategory = new Map<SignalCategory, CollectionQuery[]>();
+  const seenUrlsByCategory = new Map<SignalCategory, Set<string>>();
 
   try {
-    for (const item of queries) {
-      const results = await provider.search(item.query, {
-        maxResults: runtimeConfig.maxSearchResultsPerQuery,
-        freshnessDays: 3,
-      });
+    for (const query of queries) {
+      const categoryQueries = queriesByCategory.get(query.category) ?? [];
+      categoryQueries.push(query);
+      queriesByCategory.set(query.category, categoryQueries);
+    }
 
-      for (const result of results) {
-        candidates.push({
-          title: result.title,
-          category: item.category,
-          url: result.url,
-          sourceName: result.sourceName,
-          snippet: result.snippet || result.title,
-          publishedAt: result.publishedAt ?? "",
-          discoveredAt: result.discoveredAt,
+    for (const category of signalCategories) {
+      const categoryQueries = queriesByCategory.get(category) ?? [];
+      const seenUrls = seenUrlsByCategory.get(category) ?? new Set<string>();
+      seenUrlsByCategory.set(category, seenUrls);
+
+      for (const item of categoryQueries) {
+        const remaining =
+          runtimeConfig.maxSearchResultsPerCategory - seenUrls.size;
+
+        if (remaining <= 0) {
+          break;
+        }
+
+        const results = await provider.search(item.query, {
+          maxResults: Math.min(runtimeConfig.maxSearchResultsPerQuery, remaining),
+          freshnessDays: 3,
         });
+
+        for (const result of results) {
+          if (seenUrls.has(result.url)) {
+            continue;
+          }
+
+          seenUrls.add(result.url);
+          candidates.push({
+            title: result.title,
+            category: item.category,
+            url: result.url,
+            sourceName: result.sourceName,
+            snippet: result.snippet || result.title,
+            publishedAt: result.publishedAt ?? result.discoveredAt,
+            discoveredAt: result.discoveredAt,
+          });
+        }
       }
     }
   } finally {
@@ -68,9 +102,10 @@ async function collectWithBrowserSearch(): Promise<CollectionCandidate[]> {
 
 export async function runManualCollection(): Promise<CollectionRun> {
   const run = createRunningRun();
-  insertCollectionRun(run);
 
   try {
+    insertCollectionRun(run);
+
     const runtimeConfig = getCollectionRuntimeConfig();
     const rawCandidates = runtimeConfig.liveBrowserSearchEnabled
       ? await collectWithBrowserSearch()
@@ -119,10 +154,21 @@ export async function runManualCollection(): Promise<CollectionRun> {
       ...run,
       status: "error",
       endedAt: new Date().toISOString(),
-      errors: [error instanceof Error ? error.message : String(error)],
+      errors: [getErrorMessage(error)],
     };
 
-    updateCollectionRun(failed);
+    try {
+      updateCollectionRun(failed);
+    } catch (updateError) {
+      return {
+        ...failed,
+        errors: [
+          ...failed.errors,
+          `写入采集状态失败：${getErrorMessage(updateError)}`,
+        ],
+      };
+    }
+
     return failed;
   }
 }

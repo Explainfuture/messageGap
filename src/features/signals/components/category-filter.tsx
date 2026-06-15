@@ -1,8 +1,17 @@
-import Link from "next/link";
+"use client";
+
+import { ChevronDown } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { signalCategories, type SignalCategory } from "@/features/signals/types";
-import { cn } from "@/lib/utils";
 
 export function CategoryFilter({
   activeCategory,
@@ -11,33 +20,48 @@ export function CategoryFilter({
 }) {
   const active = activeCategory ?? "all";
   const categories = ["all", ...signalCategories] as const;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  function hrefFor(category: (typeof categories)[number]) {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (category === "all") {
+      params.delete("category");
+    } else {
+      params.set("category", category);
+    }
+
+    const queryString = params.toString();
+    return queryString ? `/?${queryString}` : "/";
+  }
 
   return (
-    <nav
-      aria-label="信息差分类"
-      className="flex flex-wrap gap-2 rounded-lg border bg-card/70 p-1 shadow-sm shadow-primary/5"
-    >
-      {categories.map((category) => {
-        const label = category === "all" ? "全部" : category;
-        const href = category === "all" ? "/" : `/?category=${category}`;
-
-        return (
+    <nav aria-label="信息差分类" className="w-full md:w-56">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
           <Button
-            key={category}
-            asChild
-            variant={active === category ? "default" : "ghost"}
-            size="sm"
-            className={cn(
-              "h-8 border border-transparent px-3",
-              active === category
-                ? "shadow-sm shadow-primary/20"
-                : "text-muted-foreground hover:border-primary/15 hover:text-foreground",
-            )}
+            variant="outline"
+            className="h-10 w-full justify-between bg-card/90 px-3"
           >
-            <Link href={href}>{label}</Link>
+            {active === "all" ? "全部分类" : active}
+            <ChevronDown aria-hidden="true" className="size-4 opacity-60" />
           </Button>
-        );
-      })}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
+          <DropdownMenuGroup>
+            {categories.map((category) => (
+              <DropdownMenuItem
+                key={category}
+                selected={active === category}
+                onSelect={() => router.push(hrefFor(category))}
+              >
+                {category === "all" ? "全部分类" : category}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </nav>
   );
 }

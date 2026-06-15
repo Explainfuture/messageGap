@@ -21,9 +21,9 @@ export function RunStatus({
         <p>尚未运行采集任务，当前采集模式：{formatMode(runtime)}。</p>
         {runtime.mode === "browser-search" ? (
           <p>
-            立即采集覆盖 {runtime.searchDirectionsPerRun} 个方向，每个方向{" "}
-            {runtime.searchQueriesPerCategory} 组关键词，每组最多{" "}
-            {runtime.maxSearchResultsPerQuery} 条候选。
+            立即采集覆盖 {runtime.searchDirectionsPerRun} 个方向，每个方向最多{" "}
+            {runtime.maxSearchResultsPerCategory} 条候选，最多用{" "}
+            {runtime.searchQueriesPerCategory} 组关键词补足。
           </p>
         ) : null}
       </div>
@@ -39,9 +39,9 @@ export function RunStatus({
       </p>
       {runtime.mode === "browser-search" ? (
         <p>
-          立即采集覆盖 {runtime.searchDirectionsPerRun} 个方向，每个方向{" "}
-          {runtime.searchQueriesPerCategory} 组关键词，每组最多{" "}
-          {runtime.maxSearchResultsPerQuery} 条候选。
+          立即采集覆盖 {runtime.searchDirectionsPerRun} 个方向，每个方向最多{" "}
+          {runtime.maxSearchResultsPerCategory} 条候选，最多用{" "}
+          {runtime.searchQueriesPerCategory} 组关键词补足。
         </p>
       ) : null}
       <p>

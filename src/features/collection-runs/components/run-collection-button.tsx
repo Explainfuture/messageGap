@@ -12,8 +12,9 @@ import type {
 } from "@/features/collection-runs/server/runtime-config";
 
 type CollectionRunResponse = {
-  run: CollectionRun;
+  run?: CollectionRun;
   runtime: CollectionRuntimeConfig;
+  error?: string;
 };
 
 function modeLabel(mode: CollectionMode) {
@@ -42,13 +43,21 @@ export function RunCollectionButton({
         method: "POST",
       });
 
+      const payload = (await response.json()) as CollectionRunResponse;
+
       if (!response.ok) {
-        throw new Error("采集任务启动失败");
+        throw new Error(payload.error || "采集任务启动失败");
       }
 
-      const payload = (await response.json()) as CollectionRunResponse;
+      if (!payload.run) {
+        throw new Error(payload.error || "采集任务没有返回结果");
+      }
+
       setLastRun(payload.run);
       setLastRuntime(payload.runtime);
+      if (payload.run.status === "error") {
+        setError(payload.run.errors[0] ?? "采集任务执行失败");
+      }
       startTransition(() => router.refresh());
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "未知错误");

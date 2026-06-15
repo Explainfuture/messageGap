@@ -11,7 +11,12 @@ export type CollectionRuntimeConfig = {
   searchDirectionsPerRun: number;
   searchQueriesPerCategory: number;
   maxSearchResultsPerQuery: number;
+  maxSearchResultsPerCategory: number;
 };
+
+function getPositiveIntegerEnv(name: string, fallback: number) {
+  return Math.max(1, Math.floor(getNumberEnv(name, fallback)));
+}
 
 export function getCollectionRuntimeConfig(): CollectionRuntimeConfig {
   const liveBrowserSearchEnabled = getBooleanEnv(
@@ -28,7 +33,17 @@ export function getCollectionRuntimeConfig(): CollectionRuntimeConfig {
       false,
     ),
     searchDirectionsPerRun: signalCategories.length,
-    searchQueriesPerCategory: getNumberEnv("SEARCH_QUERIES_PER_CATEGORY", 1),
-    maxSearchResultsPerQuery: getNumberEnv("MAX_SEARCH_RESULTS_PER_QUERY", 2),
+    searchQueriesPerCategory: getPositiveIntegerEnv(
+      "SEARCH_QUERIES_PER_CATEGORY",
+      2,
+    ),
+    maxSearchResultsPerQuery: getPositiveIntegerEnv(
+      "MAX_SEARCH_RESULTS_PER_QUERY",
+      10,
+    ),
+    maxSearchResultsPerCategory: getPositiveIntegerEnv(
+      "MAX_SEARCH_RESULTS_PER_CATEGORY",
+      10,
+    ),
   };
 }
